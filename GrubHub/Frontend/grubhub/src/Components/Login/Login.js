@@ -11,6 +11,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { loginRequest } from '../../actions/loginAction';
 import constants from '../../config.js';
+import { login } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 var jwtDecode = require('jwt-decode');
 
 
@@ -80,8 +82,8 @@ class Login extends Component {
 
         this.state = {
             username : "",
-            password : "",
-            email : "",
+            Password : "",
+            Email : "",
             firstName : "",
             lastName : "",
             phone : "",
@@ -91,8 +93,7 @@ class Login extends Component {
             role : "",
             authFlag : false
         }
-        this.usernameHandler = this.usernameHandler.bind(this);
-        this.passwordHandler = this.passwordHandler.bind(this);
+        this.handleChange = this.handleChange.bind(this);
         this.submitLogin = this.submitLogin.bind(this);
     }
 
@@ -102,70 +103,31 @@ class Login extends Component {
         });
     }
 
-    usernameHandler = (e) => {
+    handleChange = (e) => {
         this.setState({
-            username : e.target.value
-        })
+            [e.target.name] : e.target.value
+        });
     }
 
-    passwordHandler = (e) => {
-        this.setState({
-            password : e.target.value
-        })
-    }
-
-    submitLogin = (e) => {
+    submitLogin = async(e) => {
         console.log("Inside login post request");
         e.preventDefault();
+        let response = await this.props.login({
+            variables : {
+                Email : this.state.Email,
+                Password : this.state.Password
+            }
+        })
+        console.log(response.data.login);
+        this.setState({
+            Email : response.data.login.Email,
+            FirstName : response.data.login.FirstName,
+            LastName : response.data.login.LastName,
+            RestaurantName : response.data.login.RestaurantName,
+            Cuisine : response.data.login.Cuisine,
+            role : response.data.login.role
+        });
 
-        const data = {
-            username : this.state.username,
-            password : this.state.password,
-            setShow : false
-        }
-        console.log(data);
-        //this.props.loginRequest(data);
-        axios.defaults.withCredentials = true;
-        axios.post(constants.apiUrl+'Login',data)
-        .then(response => {
-            console.log(response.data.token);
-            const fullJwtToken = response.data.token;
-            const tokenURL = fullJwtToken.split(' ')[1];
-            console.log(tokenURL);
-            var decodedResponse = jwtDecode(tokenURL);
-            console.log("Token : "+tokenURL);
-            localStorage.setItem('Token',tokenURL);
-            console.log(decodedResponse.role);
-            if(response.status === 200) {
-                if(decodedResponse.role == 'Buyer' || decodedResponse.role == 'Owner') {
-                //if(response.data[0].role == 'Buyer' || response.data[0].role == 'Owner') {
-                    console.log(response.data);
-                    console.log('yeee');
-                    this.setState({
-                        email : decodedResponse.Email,
-                        firstName : decodedResponse.FirstName,
-                        lastName : decodedResponse.LastName,
-                        phone : decodedResponse.PhoneNumber,
-                        restaurantName : decodedResponse.RestaurantName,
-                        restaurantZipCode : decodedResponse.RestaurantZipCode,
-                        cuisine : decodedResponse.Cuisine,
-                        role : decodedResponse.role
-                    })            
-                }
-                
-            }
-            else {
-                this.setState({
-                    setShow : true
-                })
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            this.setState({
-                setShow : true
-            })
-        })
     }
 
     handleClose = () => {
@@ -177,12 +139,10 @@ class Login extends Component {
     render() {
         let redirectVar = null;
             console.log('Inside render');
-            localStorage.setItem('Email',this.state.email);
-            localStorage.setItem('FirstName',this.state.firstName);
-            localStorage.setItem('LastName',this.state.lastName);
-            localStorage.setItem('PhoneNumber',this.state.phone);
-            localStorage.setItem('RestaurantName',this.state.restaurantName);
-            localStorage.setItem('RestaurantZipCode',this.state.restaurantZipCode);
+            localStorage.setItem('Email',this.state.Email);
+            localStorage.setItem('FirstName',this.state.FirstName);
+            localStorage.setItem('LastName',this.state.LastName);
+            localStorage.setItem('RestaurantName',this.state.RestaurantName);
             localStorage.setItem('Cuisine',this.state.cuisine);
             if(this.state.role == 'Buyer') {
                 console.log('Inside the buyer render')
@@ -209,10 +169,10 @@ class Login extends Component {
                         <hr/>
                         <form>
                         <label for = "Email" style={labelStyle}>Email</label>
-                        <input type="text" class="form-control" required id="exampleInputEmail1" aria-describedby="emailHelp" style={formInputStyle} onChange = {this.usernameHandler}/>
+                        <input type="email" class="form-control" required id="exampleInputEmail1" name = "Email" aria-describedby="emailHelp" style={formInputStyle} onChange = {this.handleChange}/>
                         <br/>
                         <label for = "Password" style={labelStyle}>Password</label>
-                        <input type="password" class="form-control" required id="exampleInputPassword1" required aria-describedby="emailHelp" style={formInputStyle} onChange = {this.passwordHandler}/>
+                        <input type="password" class="form-control" required id="exampleInputPassword1" name = "Password" required aria-describedby="emailHelp" style={formInputStyle} onChange = {this.handleChange}/>
                         <br/>
                         <button type="button" class="btn btn-danger" style={buttonClass} onClick = {this.submitLogin}>
                             <b>    
@@ -242,4 +202,4 @@ class Login extends Component {
     loginRequest : PropTypes.func.isRequired
 };*/
 
-export default Login;
+export default graphql(login, {name : "login"})(Login);

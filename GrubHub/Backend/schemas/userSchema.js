@@ -58,9 +58,9 @@ var userType = new GraphQLObjectType({
         user: {
           type: userType,
           args: {
-            id: {
-              name: '_id',
-              type: GraphQLString
+            Email : {
+              name : 'Email',
+              type : GraphQLString
             }
           },
           resolve: function (root, params) {
@@ -75,11 +75,10 @@ var userType = new GraphQLObjectType({
     }
   });
 
-  var mutation = new GraphQLObjectType({
+  const mutation = new GraphQLObjectType({
       name : 'Mutation',
-      fields: function() {
-          return {
-              addUser : {
+      fields: {
+              addBuyer : {
                   type: userType,
                   args : {
                     FirstName : {
@@ -95,7 +94,7 @@ var userType = new GraphQLObjectType({
                           type : GraphQLString
                       },
                       role : {
-                          type : GraphQLString
+                        type : GraphQLString
                       }
                   },
                   resolve : function(root, params) {
@@ -106,8 +105,83 @@ var userType = new GraphQLObjectType({
                       }
                       return newUser
                   }
+              },
+
+              addOwner : {
+                  type: userType,
+                  args : {
+                    FirstName : {
+                          type : GraphQLString
+                      },
+                      LastName : {
+                          type : GraphQLString
+                      },
+                      Email : {
+                          type : GraphQLString
+                      },
+                      Password : {
+                          type : GraphQLString
+                      },
+                      RestaurantName : {
+                        type: GraphQLString
+                      },
+                      Cuisine : {
+                        type : GraphQLString
+                      },
+                      role : {
+                        type : GraphQLString
+                      }
+                  },
+                  resolve : function(root, params) {
+                      const user = new userModel(params);
+                      const newUser = user.save();
+                      if(!newUser) {
+                          throw new Error('Error')
+                      }
+                      return newUser
+                  }
+              },
+
+              login : {
+                    type : userType,
+                    args : {
+                      Email : {
+                        type : GraphQLString
+                      },
+                      Password : {
+                        type : GraphQLString
+                      }
+                    },
+                    resolve : function(root, params) {
+                      const response = userModel.findOne({Email : params.Email});
+                      if(!response) {
+                        throw new Error('Error');
+                      } 
+                      return response
+                    }
+              },
+
+              buyerProfileUpdate : {
+                type : userType,
+                args : {
+                  FirstName : {
+                    type : GraphQLString
+                  },
+                  LastName : {
+                    type : GraphQLString
+                  },
+                  Email : {
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root, params) {
+                  const response = userModel.findOneAndUpdate({Email : params.Email}, {$set: {FirstName : params.FirstName, LastName : params.LastName, Email : params.Email}},{new:true});
+                  if(!response) {
+                    throw new Error('Error');
+                  }
+                  return response;
+                }
               }
-          }
       }
   });
 

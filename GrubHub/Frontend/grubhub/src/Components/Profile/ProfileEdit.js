@@ -7,6 +7,8 @@ import Logo from '../Login/grubhub-vector-logo.svg';
 import axios from 'axios';
 import Upload from './UploadImage';
 import constants from '../../config';
+import { buyerProfileUpdate } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -116,9 +118,9 @@ class ProfileEdit extends Component {
         })  
     }
 
-    onUpdate = (e) => {
+    onUpdate = async(e) => {
         console.log('Inside the update post method');
-        const data = {
+        /*const data = {
             FirstName : this.state.FirstName,
             LastName : this.state.LastName,
             Email : this.state.Email,
@@ -137,7 +139,16 @@ class ProfileEdit extends Component {
         })
         .catch(error => {
             console.log(error)
-        });
+        });*/
+
+        let response = await this.props.buyerProfileUpdate({
+            variables : {
+                FirstName : this.state.FirstName,
+                LastName : this.state.LastName,
+                Email : this.state.Email
+            }
+        })
+        console.log(response.data);
     }
 
     handleLogout = () => {
@@ -146,13 +157,8 @@ class ProfileEdit extends Component {
     }
 
     render() {
-        let redirectVar = null;
-        if(!localStorage.getItem('Token')) {
-            redirectVar = <Redirect to = '/' />
-        }
         return (
             <div>
-                {redirectVar}
                 <div style = {bodyStyle}>
                     <nav className = "navbar navbar-expand-lg navbar-light bg-light" style = {navStyle} >
                         <a class="navbar-brand" href="#">
@@ -190,4 +196,4 @@ class ProfileEdit extends Component {
     }
 }
 
-export default ProfileEdit;
+export default graphql(buyerProfileUpdate, {name : "buyerUpdateProfile"})(ProfileEdit);

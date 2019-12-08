@@ -9,7 +9,7 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { signUpBuyer } from '../../actions/signupAction';
-import { addBuyerMutation } from '../mutations/addUser';
+import { addBuyerMutation } from '../mutations/mutations';
 import { graphql } from 'react-apollo';
 
 const loginContainerStyle = {
@@ -120,13 +120,10 @@ class Signup extends Component {
             LastName : "",
             Email : "",
             Password : "",
-            buyer : "Buyer",
+            role : "",
             authFlag : false
         }
-        this.emailHandler = this.emailHandler.bind(this);
-        this.lastNameHandler = this.lastNameHandler.bind(this);
-        this.firstNameHandler = this.firstNameHandler.bind(this);
-        this.passwordHandler = this.passwordHandler.bind(this);
+        this.handleChange = this.handleChange.bind(this);
         this.submitLogin = this.submitLogin.bind(this);
     }
 
@@ -136,28 +133,10 @@ class Signup extends Component {
         });
     }
 
-    lastNameHandler = (e) => {
+    handleChange = (e) => {
         this.setState({
-            LastName : e.target.value
-        })
-    }
-
-    firstNameHandler = (e) => {
-        this.setState({
-            FirstName : e.target.value
-        })
-    }
-
-    emailHandler = (e) => {
-        this.setState({
-            Email : e.target.value
-        })
-    }
-
-    passwordHandler = (e) => {
-        this.setState({
-            Password : e.target.value
-        })
+            [e.target.name] : e.target.value
+        });
     }
 
     submitLogin = async (e) => {
@@ -188,10 +167,11 @@ class Signup extends Component {
                 FirstName : this.state.FirstName,
                 LastName : this.state.LastName,
                 Email : this.state.Email,
-                Password : this.state.Password
+                Password : this.state.Password,
+                role : "Buyer"
             }
         })
-        console.log(response);
+        console.log(response.data);
 
         //this.props.signUpBuyer(data);
         this.props.history.push('/Login');
@@ -214,22 +194,22 @@ class Signup extends Component {
                                     <label for = "FirstName" style={labelStyle}>Firstname</label>
                                     &nbsp;
                                     <label for = "LastName" style={labelStyle1}>Lastname</label>
-                                    <input type="text" class="form-control" id="fName" name = "FirstName" style={formInputStyle} onChange = {this.firstNameHandler}/>
+                                    <input type="text" class="form-control" id="fName" name = "FirstName" style={formInputStyle} onChange = {this.handleChange}/>
                                     &nbsp;
-                                    <input type="text" class="form-control" id="lName" name = "LastName" style={formInputStyle1} onChange = {this.lastNameHandler}/>
+                                    <input type="text" class="form-control" id="lName" name = "LastName" style={formInputStyle1} onChange = {this.handleChange}/>
                                     <br/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <label for = "Email" style={labelStyle}>Email</label>
-                                    <input type="email" class="form-control" id="exampleInputEmail" name = "Email" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.emailHandler}/>
+                                    <input type="email" class="form-control" id="exampleInputEmail" name = "Email" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <label for = "Password" style={labelStyleP}>Password</label>
-                                    <input type="password" class="form-control" id="exampleInputPassword1" name = "Password" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.passwordHandler}/>
+                                    <input type="password" class="form-control" id="exampleInputPassword1" name = "Password" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                         </table>

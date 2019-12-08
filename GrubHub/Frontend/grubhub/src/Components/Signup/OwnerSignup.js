@@ -9,6 +9,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { signUpOwner } from '../../actions/signupAction';
+import { addOwnerMutation } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 const loginContainerStyle = {
     backgroundColor : '#FEFEFE',
@@ -110,26 +112,21 @@ const buttonClass = {
     fontFamily: 'grubhubsans-bold'
 };
 
-class Signup extends Component {
+class OwnerSignup extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            firstName : "",
-            lastName : "",
-            email : "",
-            password : "",
-            restaurantName : "",
-            restaurantZipCode : "",
-            owner : "Owner",
+            FirstName : "",
+            LastName : "",
+            Email : "",
+            Password : "",
+            RestaurantName : "",
+            Cuisine : "",
+            role : "",
             authFlag : false
         }
-        this.emailHandler = this.emailHandler.bind(this);
-        this.lastNameHandler = this.lastNameHandler.bind(this);
-        this.firstNameHandler = this.firstNameHandler.bind(this);
-        this.passwordHandler = this.passwordHandler.bind(this);
-        this.restaurantNameHandler = this.restaurantNameHandler.bind(this);
-        this.restaurantZipCodeHandler = this.restaurantZipCodeHandler.bind(this);
+        this.handleChange = this.handleChange.bind(this);
         this.submitLogin = this.submitLogin.bind(this);
     }
 
@@ -139,47 +136,17 @@ class Signup extends Component {
         });
     }
 
-    lastNameHandler = (e) => {
+    handleChange = (e) => {
         this.setState({
-            lastName : e.target.value
-        })
+            [e.target.name] : e.target.value
+        });
     }
 
-    firstNameHandler = (e) => {
-        this.setState({
-            firstName : e.target.value
-        })
-    }
-
-    emailHandler = (e) => {
-        this.setState({
-            email : e.target.value
-        })
-    }
-
-    passwordHandler = (e) => {
-        this.setState({
-            password : e.target.value
-        })
-    }
-
-    restaurantNameHandler = (e) => {
-        this.setState({
-            restaurantName : e.target.value
-        })
-    }
-
-    restaurantZipCodeHandler = (e) => {
-        this.setState({
-            restaurantZipCode : e.target.value
-        })
-    }
-
-    submitLogin = (e) => {
+    submitLogin = async (e) => {
         console.log("Inside OwnerSignup post request");
         e.preventDefault();
 
-        const data = {
+        /*const data = {
             email : this.state.email,
             firstName : this.state.firstName,
             lastName : this.state.lastName,
@@ -189,7 +156,20 @@ class Signup extends Component {
             owner : this.state.owner
         }
 
-        this.props.signUpOwner(data);
+        this.props.signUpOwner(data);*/
+
+        let response = await this.props.addOwnerMutation({
+            variables : {
+                FirstName : this.state.FirstName,
+                LastName : this.state.LastName,
+                Email : this.state.Email,
+                Password : this.state.Password,
+                RestaurantName : this.state.RestaurantName,
+                Cuisine : this.state.Cuisine,
+                role : "Owner"
+            }
+        })
+
         this.props.history.push('/Login');
 
         /*axios.post('http://localhost:3001/Signup/Owner',data)
@@ -221,34 +201,34 @@ class Signup extends Component {
                                     <label for = "FirstName" style={labelStyle}>Firstname</label>
                                     &nbsp;
                                     <label for = "LastName" style={labelStyle1}>Lastname</label>
-                                    <input type="text" class="form-control" id="fName" style={formInputStyle} onChange = {this.firstNameHandler}/>
+                                    <input type="text" class="form-control" id="fName" name = "FirstName" style={formInputStyle} onChange = {this.handleChange}/>
                                     &nbsp;
-                                    <input type="text" class="form-control" id="lName" style={formInputStyle1} onChange = {this.lastNameHandler}/>
+                                    <input type="text" class="form-control" id="lName" name = "LastName" style={formInputStyle1} onChange = {this.handleChange}/>
                                     <br/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <label for = "Email" style={labelStyle}>Email</label>
-                                    <input type="email" class="form-control" id="exampleInputEmail" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.emailHandler}/>
+                                    <input type="email" class="form-control" id="exampleInputEmail" name = "Email" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <label for = "Password" style={labelStyleP}>Password</label>
-                                    <input type="password" class="form-control" id="exampleInputPassword1" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.passwordHandler}/>
+                                    <input type="password" class="form-control" id="exampleInputPassword1" name = "Password" aria-describedby="emailHelp" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <label for = "RestaurantName" style={labelStyleP}>Restaurant Name</label>
-                                    <input type="text" class="form-control" id="restaurantName" style={formInputStyle2} onChange = {this.restaurantNameHandler}/>
+                                    <input type="text" class="form-control" id="restaurantName" name = "RestaurantName" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <label for = "RestaurantZipCode" style={labelStyleP}>Restaurant Zipcode</label>
-                                    <input type="text" class="form-control" id="restaurantZipCode" style={formInputStyle2} onChange = {this.restaurantZipCodeHandler}/>
+                                    <label for = "RestaurantZipCode" style={labelStyleP}>Cuisine</label>
+                                    <input type="text" class="form-control" id="restaurantZipCode" name = "Cuisine" style={formInputStyle2} onChange = {this.handleChange}/>
                                 </td>
                             </tr>
                         </table>
@@ -265,8 +245,5 @@ class Signup extends Component {
     }
 }
 
-Signup.protoType = {
-    signUpOwner : PropTypes.func.isRequired
-};
 
-export default connect(null, { signUpOwner })(Signup);
+export default graphql(addOwnerMutation, {name : "addOwnerMutation"})(OwnerSignup);

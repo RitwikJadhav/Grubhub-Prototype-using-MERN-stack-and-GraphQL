@@ -53,9 +53,8 @@ app.use(function(req, res, next) {
 
 require('./api/auth/auth')(passport);
 
-app.use('/graphql', cors(), graphqlHTTP({
+app.use('/graphql', graphqlHTTP({
     schema: userSchema,
-    rootValue: global,
     graphiql: true,
 }));
 
