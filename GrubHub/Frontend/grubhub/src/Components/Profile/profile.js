@@ -10,6 +10,8 @@ import constants from '../../config';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getProfileDetails } from '../../actions/profileAction';
+import { getProfile } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -31,7 +33,7 @@ const navStyle = {
 const containerClass = {
     backgroundColor : '#FEFEFE',
     height: '560px',
-    marginTop : '-366px',
+    marginTop : '30px',
     width : '450px',
     marginLeft : '550px'
 }
@@ -73,7 +75,7 @@ const containerLeftClass = {
     backgroundColor : '#FEFEFE',
     width : '300px',
     height : '300px',
-    marginTop : '100px',
+    marginTop : '0px',
     marginLeft : '50px'
 }
 
@@ -93,15 +95,12 @@ class profile extends Component {
     componentWillReceiveProps({ profiles }) {
         console.log('Insdide component will received props');
         console.log(profiles);
-        document.getElementById('FirstNameDiv').innerHTML = profiles.FirstName;
-        document.getElementById('LastNameDiv').innerHTML = profiles.LastName;
-        document.getElementById('EmailDiv').innerHTML = profiles.Email;
-        document.getElementById('PhoneNumberDiv').innerHTML = profiles.PhoneNumber;
+        
     }
 
-    componentDidMount = () => {
+    componentDidMount = async() => {
         console.log('Inside componentDidMount');
-        this.props.getProfileDetails();
+        //this.props.getProfileDetails();
         /*var getLocalString = localStorage.getItem('Email')
         let config = {
             headers : {
@@ -115,8 +114,17 @@ class profile extends Component {
             document.getElementById('LastNameDiv').innerHTML = response.data.LastName;
             document.getElementById('EmailDiv').innerHTML = response.data.Email;
             document.getElementById('PhoneNumberDiv').innerHTML = response.data.PhoneNumber;
-
         })*/
+        let response = await this.props.getProfile({
+            variables : {
+                Email : localStorage.getItem('Email')
+            }
+        })
+        console.log(response.data.getProfile);
+        document.getElementById('FirstNameDiv').innerHTML = response.data.getProfile.FirstName;
+        document.getElementById('LastNameDiv').innerHTML = response.data.getProfile.LastName;
+        document.getElementById('EmailDiv').innerHTML = response.data.getProfile.Email;
+
     }
 
     handleChange = (e) => {
@@ -146,9 +154,6 @@ class profile extends Component {
                             </ul>
                         </div>
                     </nav> 
-                    <div className = "containerLeft" style = {containerLeftClass}>
-                        <Upload />
-                    </div>
                     <div className = "container" style = {containerClass}>
                         <p style = {pStyle}><b>Your account</b></p>
                         <hr/>
@@ -161,9 +166,6 @@ class profile extends Component {
                         <label for = "Email" style = {labelStyle}>Email</label>
                         <div id = "EmailDiv" onChange = {this.handleChange} style = {divStyle}></div>
                         <hr/>
-                        <label for = "PhoneNumber" style = {labelStyle}>Phone-number</label>
-                        <div id = "PhoneNumberDiv" onChange = {this.handleChange} style = {divStyle}></div>
-                        <hr/>
                         <button class = "btn btn-outline-danger" style = {buttonStyle}><Link to = '/ProfileEdit/:id' style = {linkStyle}>Edit</Link></button>
                     </div>  
                 </div>
@@ -172,13 +174,5 @@ class profile extends Component {
     }
 }
 
-profile.protoType = {
-    getProfileDetails : PropTypes.func.isRequired,
-    profiles : PropTypes.array.isRequired
-};
 
-const mapStateToProps = state => ({
-    profiles : state.profile.getProfile
-})
-
-export default connect(mapStateToProps, { getProfileDetails })(profile);
+export default graphql(getProfile,{name : "getProfile"})(profile);

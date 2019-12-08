@@ -7,8 +7,8 @@ import Logo from '../Login/grubhub-vector-logo.svg';
 import axios from 'axios';
 import Upload from './UploadImage';
 import constants from '../../config';
-import { buyerProfileUpdate } from '../mutations/mutations';
-import { graphql } from 'react-apollo';
+import { buyerProfileUpdate,getProfile } from '../mutations/mutations';
+import { graphql,compose } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -88,9 +88,9 @@ class ProfileEdit extends Component {
         this.handleLogout = this.handleLogout.bind(this);
     }
 
-    componentDidMount = () => {
+    componentDidMount = async() => {
         console.log('Inside profile edit componentDidMount');
-        var getLocalString = localStorage.getItem('Email');
+        /*var getLocalString = localStorage.getItem('Email');
         var config = {
             headers : {
                 Authorization : "JWT "+ localStorage.getItem('Token')
@@ -109,7 +109,18 @@ class ProfileEdit extends Component {
             //document.getElementById('EmailDiv').innerHTML = response.data[0].Email;
             //document.getElementById('PhoneNumberDiv').innerHTML = response.data[0].PhoneNumber;
 
+        })*/
+        let response = await this.props.getProfile({
+            variables : {
+                Email : localStorage.getItem('Email')
+            }
         })
+        console.log(response.data.getProfile);
+        this.setState({
+            FirstName : response.data.getProfile.FirstName,
+            LastName : response.data.getProfile.LastName,
+            Email : response.data.getProfile.Email
+        });
     }
 
     handleChange = (e) => {
@@ -149,6 +160,7 @@ class ProfileEdit extends Component {
             }
         })
         console.log(response.data);
+        this.props.history.push('/profile/:id')
     }
 
     handleLogout = () => {
@@ -181,9 +193,6 @@ class ProfileEdit extends Component {
                         <label for = "LastName" style = {labelStyle}>Lastname</label>
                         <input type = "text" className = "form-control" name="LastName" onChange = {this.handleChange} style = {divStyle} value = {this.state.LastName}></input>
                         <hr/>
-                        <label for = "PhoneNumber" style = {labelStyle}>Phone-number</label>
-                        <input type = "text" className = "form-control" name="PhoneNumber" onChange = {this.handleChange} style = {divStyle} value = {this.state.PhoneNumber}></input>
-                        <hr/>
                         <label for = "Email" style = {labelStyle}>Email</label>
                         <br/>
                         <input type = "text" className = "form-control" name="Email" onChange = {this.handleChange} style = {divStyle} value = {this.state.Email}></input>
@@ -196,4 +205,4 @@ class ProfileEdit extends Component {
     }
 }
 
-export default graphql(buyerProfileUpdate, {name : "buyerUpdateProfile"})(ProfileEdit);
+export default compose(graphql(getProfile, {name : "getProfile"}),graphql(buyerProfileUpdate, {name : "buyerProfileUpdate"}))(ProfileEdit);

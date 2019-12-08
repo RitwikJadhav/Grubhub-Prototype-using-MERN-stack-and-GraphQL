@@ -49,4 +49,48 @@ const buyerProfileUpdate = gql`
     }
 `;
 
-export {addBuyerMutation, addOwnerMutation, login, buyerProfileUpdate};
+const getProfile = gql`
+    mutation getProfile($Email : String) {
+        getProfile(Email:$Email) {
+            FirstName,
+            LastName,
+            Email
+        }
+    } 
+`;
+
+const getOwnerProfile = gql`
+    mutation getOwnerProfile($Email : String) {
+        getProfile(Email:$Email) {
+            FirstName,
+            LastName,
+            Email,
+            RestaurantName,
+            Cuisine
+        }
+    }
+`;
+
+const ownerProfileUpdate = gql`
+    mutation ownerProfileUpdate($FirstName:String, $LastName : String, $Email : String, $RestaurantName: String, $Cuisine : String) {
+        ownerProfileUpdate(FirstName : $FirstName, LastName : $LastName, Email : $Email, RestaurantName : $RestaurantName, Cuisine : $Cuisine) {
+            FirstName,
+            LastName,
+            Email,
+            RestaurantName,
+            Cuisine
+        }
+    }
+`;
+
+const addSection = gql`
+    mutation addSection($sectionName : String, $sectionDescription : String, $RestaurantName : String) {
+        addSection(sectionName : $sectionName, sectionDescription : $sectionDescription, RestaurantName : $RestaurantName) {
+            sectionName,
+            sectionDescription,
+            RestaurantName
+        }
+    }
+`;
+
+export {addBuyerMutation, addOwnerMutation, login, buyerProfileUpdate,getProfile, getOwnerProfile, ownerProfileUpdate, addSection};

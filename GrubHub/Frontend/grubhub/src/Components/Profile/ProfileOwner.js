@@ -7,6 +7,8 @@ import Logo from '../Login/grubhub-vector-logo.svg';
 import axios from 'axios';
 import Upload from './UploadImage';
 import constants from '../../config';
+import { getOwnerProfile } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -27,8 +29,8 @@ const navStyle = {
 
 const containerClass = {
     backgroundColor : '#FEFEFE',
-    height: '840px',
-    marginTop : '-366px',
+    height: '614px',
+    marginTop : '30px',
     width : '450px',
     marginLeft : '550px'
 }
@@ -81,9 +83,9 @@ class ProfileOwner extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidMount = () => {
+    componentDidMount = async() => {
         console.log('Inside componentDidMount');
-        var getLocalString = localStorage.getItem('Email');
+        /*var getLocalString = localStorage.getItem('Email');
         var config = {
             headers : {
                 Authorization : "JWT "+ localStorage.getItem('Token')
@@ -100,7 +102,19 @@ class ProfileOwner extends Component {
             document.getElementById('RestaurantZipCode').innerHTML = response.data.RestaurantZipCode;
             document.getElementById('Cuisine').innerHTML = response.data.Cuisine;
 
+        })*/
+
+        let response = await this.props.getOwnerProfile({
+            variables : {
+                Email : localStorage.getItem('Email')
+            }
         })
+        console.log(response.data.getProfile);
+        document.getElementById('FirstNameDiv').innerHTML = response.data.getProfile.FirstName;
+        document.getElementById('LastNameDiv').innerHTML = response.data.getProfile.LastName;
+        document.getElementById('EmailDiv').innerHTML = response.data.getProfile.Email;
+        document.getElementById('RestaurantName').innerHTML = response.data.getProfile.RestaurantName;
+        document.getElementById('Cuisine').innerHTML = response.data.getProfile.Cuisine;
     }
 
     handleChange = (e) => {
@@ -117,10 +131,7 @@ class ProfileOwner extends Component {
                         <a class="navbar-brand" href="#">
                             <img src = {Logo} style={imageStyle} alt="Grubhub"/>
                         </a>
-                    </nav>
-                    <div className = "containerLeft" style = {containerLeftClass}>
-                    <Upload />
-                    </div> 
+                    </nav> 
                     <div className = "container" style = {containerClass}>
                         <p style = {pStyle}><b>Your account</b></p>
                         <hr/>
@@ -133,14 +144,8 @@ class ProfileOwner extends Component {
                         <label for = "Email" style = {labelStyle}>Email</label>
                         <div id = "EmailDiv" onChange = {this.handleChange} style = {divStyle}></div>
                         <hr/>
-                        <label for = "PhoneNumber" style = {labelStyle}>Phone-number</label>
-                        <div id = "PhoneNumberDiv" onChange = {this.handleChange} style = {divStyle}></div>
-                        <hr/>
                         <label for = "RestaurantName" style = {labelStyle}>Restaurant Name</label>
                         <div id = "RestaurantName" onChange = {this.handleChange} style = {divStyle}></div>
-                        <hr/>
-                        <label for = "RestaurantZipCode" style = {labelStyle}>Restaurant Zipcode</label>
-                        <div id = "RestaurantZipCode" onChange = {this.handleChange} style = {divStyle}></div>
                         <hr/>
                         <label for = "Cuisine" style = {labelStyle}>Cuisine</label>
                         <div id = "Cuisine" onChange = {this.handleChange} style = {divStyle}></div>
@@ -153,4 +158,4 @@ class ProfileOwner extends Component {
     }
 }
 
-export default ProfileOwner;
+export default graphql(getOwnerProfile,{name : "getOwnerProfile"})(ProfileOwner);

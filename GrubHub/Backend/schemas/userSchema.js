@@ -40,6 +40,26 @@ var userType = new GraphQLObjectType({
     }
   });
 
+var sectionType = new GraphQLObjectType({
+  name : 'section',
+  fields : function() {
+    return {
+      _id : {
+        type : GraphQLString
+      },
+      sectionName : {
+        type : GraphQLString
+      },
+      sectionDescription : {
+        type : GraphQLString
+      },
+      RestaurantName : {
+        type : GraphQLString
+      }
+    }
+  }
+})
+
 
   var queryType = new GraphQLObjectType({
     name: 'Query',
@@ -181,8 +201,70 @@ var userType = new GraphQLObjectType({
                   }
                   return response;
                 }
-              }
-      }
+              },
+
+              getProfile : {
+                type : userType,
+                args : {
+                  Email : {
+                    name : "Email",
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root,params) {
+                  const profileDetails = userModel.findOne({Email : params.Email});
+                  if(!profileDetails) {
+                    throw new Error('Error')
+                  }
+                return profileDetails;
+                }
+              },
+
+              getOwnerProfile : {
+                type : userType,
+                args : {
+                  Email : {
+                    name : "Email",
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root,params) {
+                  const profileDetails = userModel.findOne({Email : params.Email});
+                  if(!profileDetails) {
+                    throw new Error('Error')
+                  }
+                return profileDetails;
+                }
+              },
+
+              ownerProfileUpdate : {
+                type : userType,
+                args : {
+                  FirstName : {
+                    type : GraphQLString
+                  },
+                  LastName : {
+                    type : GraphQLString
+                  },
+                  Email : {
+                    type : GraphQLString
+                  },
+                  RestaurantName : {
+                    type : GraphQLString
+                  },
+                  Cuisine : {
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root, params) {
+                  const response = userModel.findOneAndUpdate({Email : params.Email}, {$set: {FirstName : params.FirstName, LastName : params.LastName, Email : params.Email, RestaurantName : params.RestaurantName, Cuisine : params.Cuisine}},{new:true});
+                  if(!response) {
+                    throw new Error('Error');
+                  }
+                  return response;
+                }
+              },              
+          }
   });
 
   module.exports = new GraphQLSchema({query: queryType, mutation : mutation});

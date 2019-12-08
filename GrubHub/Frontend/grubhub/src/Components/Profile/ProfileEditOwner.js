@@ -7,6 +7,8 @@ import Logo from '../Login/grubhub-vector-logo.svg';
 import axios from 'axios';
 import Upload from './UploadImage';
 import constants from '../../config';
+import { getOwnerProfile, ownerProfileUpdate } from '../mutations/mutations';
+import { graphql, compose } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -27,7 +29,7 @@ const navStyle = {
 
 const containerClass = {
     backgroundColor : '#FEFEFE',
-    height: '890px',
+    height: '670px',
     marginTop : '36px',
     width : '450px',
     marginLeft : '550px'
@@ -79,9 +81,9 @@ class ProfileEditOwner extends Component {
         this.onUpdate = this.onUpdate.bind(this);
     }
 
-    componentDidMount = () => {
+    componentDidMount = async() => {
         console.log('Inside profile edit componentDidMount');
-        var getLocalString = localStorage.getItem('Email');
+        /*var getLocalString = localStorage.getItem('Email');
         var config = {
             headers : {
                 Authorization : "JWT "+ localStorage.getItem('Token')
@@ -103,6 +105,20 @@ class ProfileEditOwner extends Component {
             //document.getElementById('EmailDiv').innerHTML = response.data[0].Email;
             //document.getElementById('PhoneNumberDiv').innerHTML = response.data[0].PhoneNumber;
 
+        })*/
+
+        let response = await this.props.getOwnerProfile({
+            variables : {
+                Email : localStorage.getItem('Email')
+            }
+        })
+        console.log(response.data.getProfile);
+        this.setState({
+            FirstName : response.data.getProfile.FirstName,
+            LastName : response.data.getProfile.LastName,
+            Email : response.data.getProfile.Email,
+            RestaurantName : response.data.getProfile.RestaurantName,
+            Cuisine : response.data.getProfile.Cuisine
         })
     }
 
@@ -112,9 +128,9 @@ class ProfileEditOwner extends Component {
         })  
     }
 
-    onUpdate = (e) => {
+    onUpdate = async(e) => {
         console.log('Inside the update post method');
-        const data = {
+        /*const data = {
             FirstName : this.state.FirstName,
             LastName : this.state.LastName,
             Email : this.state.Email,
@@ -136,7 +152,19 @@ class ProfileEditOwner extends Component {
         })
         .catch(error => {
             console.log(error)
-        });
+        });*/
+
+        let response = await this.props.ownerProfileUpdate({
+            variables : {
+                FirstName : this.state.FirstName,
+                LastName : this.state.LastName,
+                Email : this.state.Email,
+                RestaurantName : this.state.RestaurantName,
+                Cuisine : this.state.Cuisine
+            }
+        })
+        console.log(response.data);
+        this.props.history.push('/profileOwner/:id')
     }
 
     render() {
@@ -157,18 +185,12 @@ class ProfileEditOwner extends Component {
                         <label for = "LastName" style = {labelStyle}>Lastname</label>
                         <input type = "text" className = "form-control" name="LastName" onChange = {this.handleChange} style = {divStyle} value = {this.state.LastName}></input>
                         <hr/>
-                        <label for = "PhoneNumber" style = {labelStyle}>Phone-number</label>
-                        <input type = "text" className = "form-control" name="PhoneNumber" onChange = {this.handleChange} style = {divStyle} value = {this.state.PhoneNumber}></input>
-                        <hr/>
                         <label for = "Email" style = {labelStyle}>Email</label>
                         <br/>
                         <input type = "text" className = "form-control" name="Email" onChange = {this.handleChange} style = {divStyle} value = {this.state.Email}></input>
                         <hr/>
                         <label for = "RestaurantName" style = {labelStyle}>Restaurant Name</label>
                         <input type = "text" className = "form-control" name="RestaurantName" onChange = {this.handleChange} style = {divStyle} value = {this.state.RestaurantName}></input>
-                        <hr/>
-                        <label for = "RestaurantZipCode" style = {labelStyle}>Restaurant Zip Code</label>
-                        <input type = "text" className = "form-control" name="RestaurantZipCode" onChange = {this.handleChange} style = {divStyle} value = {this.state.RestaurantZipCode}></input>
                         <hr/>
                         <label for = "Cuisine" style = {labelStyle}>Cuisine</label>
                         <br/>
@@ -182,4 +204,4 @@ class ProfileEditOwner extends Component {
     }
 }
 
-export default ProfileEditOwner;
+export default compose(graphql(ownerProfileUpdate,{name : "ownerProfileUpdate"}),graphql(getOwnerProfile,{name : "getOwnerProfile"}))(ProfileEditOwner);
