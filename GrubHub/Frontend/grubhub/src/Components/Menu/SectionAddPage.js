@@ -8,6 +8,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { sectionAddition } from '../../actions/sectionAction';
+import { addSection } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 
 const bodyStyle = {
@@ -154,8 +156,8 @@ class SectionAddPage extends Component {
         super(props);
         this.state = {
             sectionName : "",
-            sectionDesc : "",
-            restaurantName : ""
+            sectionDescription : "",
+            RestaurantName : ""
         }
 
         this.handleLogout = this.handleLogout.bind(this);
@@ -167,9 +169,9 @@ class SectionAddPage extends Component {
         cookie.remove('cookie',{ path : '/' });
     }
 
-    onItemSubmit = (e) => {
+    onItemSubmit = async(e) => {
         e.preventDefault();
-        console.log('Inside the item submit button');
+        /*console.log('Inside the item submit button');
         const data = {
             sectionName : this.state.sectionName,
             sectionDesc : this.state.sectionDesc,
@@ -188,7 +190,20 @@ class SectionAddPage extends Component {
                 console.log(response.data);
                 this.props.history.push('/Menu/HomePage/:id');
             })*/
-        }
+
+        let response = await this.props.addSection({
+            variables : {
+                sectionName : this.state.sectionName,
+                sectionDescription : this.state.sectionDescription,
+                RestaurantName : localStorage.getItem("RestaurantName")    
+            }
+        });
+        console.log(response);
+        this.props.history.push(`/Menu/HomePage/${localStorage.getItem("RestaurantName")}`);
+        
+    }
+
+
 
     handleInput = (e) => {
         this.setState({
@@ -222,7 +237,7 @@ class SectionAddPage extends Component {
                         <p style = {pStyle5}>Name your Section</p>
                         <input type = "text" className = "form-control" name = "sectionName" style = {inputStyle1} onChange = {this.handleInput} required></input>
                         <p style = {pStyle6}>Description of your Section</p>
-                        <input type = "text" className = "form-control" name = "sectionDesc" style = {inputStyle2} onChange = {this.handleInput} required></input>
+                        <input type = "text" className = "form-control" name = "sectionDescription" style = {inputStyle2} onChange = {this.handleInput} required></input>
                         <button className = "btn btn-primary" style = {buttonStyle2}>Save and Update</button>
                         <br/>
                         <button className = "btn btn-outline-primary" style = {buttonUpload}>Cancel</button>
@@ -235,8 +250,5 @@ class SectionAddPage extends Component {
     }
 }
 
-SectionAddPage.protoType = {
-    sectionAddition : PropTypes.func.isRequired
-};
 
-export default connect(null, { sectionAddition })(SectionAddPage);
+export default graphql(addSection, {name : "addSection"})(SectionAddPage);

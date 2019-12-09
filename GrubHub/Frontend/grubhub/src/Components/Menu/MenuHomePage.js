@@ -11,6 +11,9 @@ import paginate from 'paginate-array';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { itemMenuDisplay } from '../../actions/itemAction';
+import { getSectionsQuery } from '../queries/queries';
+import { graphql } from 'react-apollo';
+import { getSections } from '../mutations/mutations';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -173,29 +176,44 @@ const divStyle5 = {
     marginTop : '-10px'
 }
 
+const inputStyle5 = {
+    width: '50%',
+    fontSize : '18px',
+    fontWeight : '800',
+    marginBottom : '1%'
+}
+
+const inputStyle6 = {
+    width: '50%',
+}
+
+
 class MenuHomePage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             items: [],
             currentPage : 1,
-            itemsPerPage : 3
+            itemsPerPage : 3,
+            sections : []
         }
 
         this.handleClick = this.handleClick.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
     }
 
-    componentWillReceiveProps({items}) {
-        console.log('Inside menu will receive props');
-        this.setState({
-            items : items
-        });
-    }
-
-    componentDidMount() {
+    componentDidMount = async () => {
         console.log('Inside component will mount method');
-        this.props.itemMenuDisplay();
+        let response = await this.props.getSections({
+            variables : {
+                RestaurantName : localStorage.getItem("RestaurantName")
+            }
+        })
+        console.log(response.data.getSections);
+        this.setState({
+            sections : response.data.getSections
+        })
+        //this.props.itemMenuDisplay();
         /*var localRestaurantName = localStorage.getItem('RestaurantName');
         const config = {
             headers : {
@@ -220,35 +238,34 @@ class MenuHomePage extends Component {
         });
       }
 
-    render() {  
-        const {items,currentPage, itemsPerPage} = this.state;
-
-        const indexOfLastItem = currentPage * itemsPerPage;
-        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-        const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
-        const MenuList = currentItems.map((item) => (
-            <div key = {item._id} style = {divStyle5}>
-                <div style = {divStyle4}>
-                    <DisplayImage imageName = {item.itemName}/>
-                </div>
-                <input type = "text" name = "itemName" className = "form-control" defaultValue = {item.itemName} style = {inputStyle2}></input>
-                <input type = "text" name = "itemDescription" className = "form-control" defaultValue = {item.description} style = {inputStyle3}></input>
-                <input type = "text" name = "itemPrice" className = "form-control" defaultValue =  {item.itemprice} style = {inputStyle4}></input>
-                <hr/>
-            </div>
-        ));
-
-        const pageNumbers = [];
-        for(let i = 1; i <= Math.ceil(items.length / itemsPerPage);i++) {
-            pageNumbers.push(i);
-        }
-        const renderNumbers = pageNumbers.map(number => {
+    render() { 
+        let sectionList = this.state.sections.map(section => {
             return (
-                <button className = "btn btn-outline-primary" key = {number} id = {number} onClick = {this.handleClick}> 
-                    {number}
-                </button>
-            );
-        });
+                <div>
+                    <input type = "text" name = "sectionName" className = "form-control" defaultValue = {section.sectionName} style = {inputStyle5}></input>
+                    {section.items.map(item => {
+                        return (
+                            <div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">Item Name</div>
+                                    </div>
+                                    <input type = "text" name = "itemName" className = "form-control" defaultValue = {item.itemName} style = {inputStyle6}></input>
+                                </div>
+                                <div class = "input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">Item Price</div>
+                                    </div>
+                                    <input type = "text" name = "itemprice" className = "form-control" defaultValue = {item.itemprice} style = {inputStyle6}></input>
+                                </div>
+                                <hr/>
+                            </div>
+                        )
+                    })}
+                    <hr/>
+                </div>
+            )  
+        })
         return (
             <div>
                 <div style = {bodyStyle}>
@@ -270,8 +287,7 @@ class MenuHomePage extends Component {
                     <div className = "container" style = {divStyle1}>
                         <p style = {pStyle}>Restaurant Menu</p>
                         <div className = "jumbotron" style = {divStyle3}>
-                            {MenuList}
-                            {renderNumbers}
+                            {sectionList}  
                         </div>
                     </div>
 
@@ -293,13 +309,4 @@ class MenuHomePage extends Component {
     }
 }
 
-MenuHomePage.protoType = {
-    itemMenuDisplay : PropTypes.func.isRequired,
-    items : PropTypes.array.isRequired
-};
-
-const mapStateToProps = state => ({
-    items : state.menuItems.items
-})
-
-export default connect(mapStateToProps, { itemMenuDisplay })(MenuHomePage);
+export default graphql(getSections, {name : "getSections"})(MenuHomePage);

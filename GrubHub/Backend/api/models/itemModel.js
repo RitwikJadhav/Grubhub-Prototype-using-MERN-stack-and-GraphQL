@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.ObjectId;
 
 const itemsModel = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
     itemName : String,
     itemprice : String,
     SectionName : String,

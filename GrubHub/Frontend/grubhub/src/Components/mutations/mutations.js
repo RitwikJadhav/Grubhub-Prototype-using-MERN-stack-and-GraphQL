@@ -93,4 +93,30 @@ const addSection = gql`
     }
 `;
 
-export {addBuyerMutation, addOwnerMutation, login, buyerProfileUpdate,getProfile, getOwnerProfile, ownerProfileUpdate, addSection};
+const addItem = gql`
+    mutation addItem($itemName : String, $itemprice : String, $SectionName : String, $description : String, $RestaurantName : String) {
+        addItem(itemName : $itemName, itemprice : $itemprice, SectionName : $SectionName, description : $description, RestaurantName : $RestaurantName) {
+            itemName,
+            itemprice,
+            SectionName,
+            description,
+            RestaurantName
+        }
+    }
+`;
+
+const getSections = gql`
+    mutation getSections($RestaurantName : String) {
+        getSections(RestaurantName : $RestaurantName) {
+            sectionName,
+            sectionDescription,
+            RestaurantName,
+            items {
+                itemName,
+                itemprice
+            }
+        }
+    }
+`;
+
+export {addBuyerMutation, addOwnerMutation, login, buyerProfileUpdate,getProfile, getOwnerProfile, ownerProfileUpdate, addSection,addItem,getSections};

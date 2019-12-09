@@ -7,6 +7,8 @@ var GraphQLID = require('graphql').GraphQLID;
 var GraphQLString = require('graphql').GraphQLString;
 var GraphQLInt = require('graphql').GraphQLInt;
 var userModel = require('../api/models/userinfoModel');
+var sectionModel = require('../api/models/sectionModel');
+var itemModel = require('../api/models/itemModel');
 
 var userType = new GraphQLObjectType({
     name: 'user',
@@ -55,11 +57,43 @@ var sectionType = new GraphQLObjectType({
       },
       RestaurantName : {
         type : GraphQLString
+      },
+      items : {
+        type : new GraphQLList(itemType),
+        resolve : async (section) => {
+          const items = await itemModel.find()
+          return items.filter(item => item.SectionName == section.sectionName)
+        }
+      }
+    }
+  }
+});
+
+var itemType = new GraphQLObjectType({
+  name : 'item',
+  fields : function() {
+    return {
+      _id : {
+        type : GraphQLString
+      },
+      itemName : {
+        type : GraphQLString
+      },
+      itemprice : {
+        type : GraphQLString
+      },
+      SectionName : {
+        type : GraphQLString
+      },
+      description : {
+        type : GraphQLString
+      },
+      RestaurantName : {
+        type : GraphQLString
       }
     }
   }
 })
-
 
   var queryType = new GraphQLObjectType({
     name: 'Query',
@@ -89,6 +123,17 @@ var sectionType = new GraphQLObjectType({
               throw new Error('Error')
             }
             return userDetails
+          }
+        },
+
+        sections : {
+          type : new GraphQLList(sectionType),
+          resolve : function(root,params) {
+            const sections = sectionModel.find({RestaurantName : "Vaishali"}).exec()
+            if(!sections) {
+              throw new Error('Error')
+            }
+            return sections
           }
         }
       }
@@ -263,7 +308,74 @@ var sectionType = new GraphQLObjectType({
                   }
                   return response;
                 }
-              },              
+              }, 
+
+              addSection : {
+                type : sectionType,
+                args : {
+                  sectionName : {
+                    type : GraphQLString
+                  },
+                  sectionDescription : {
+                    type : GraphQLString
+                  },
+                  RestaurantName : {
+                    type : GraphQLString
+                  }
+                },
+
+                resolve : function(root,params) {
+                  const section = new sectionModel(params);
+                  const newSection = section.save();
+                  if(!newSection) {
+                        throw new Error('Error');
+                  }
+                  return newSection
+                }
+              },
+
+              addItem : {
+                type : itemType,
+                args : {
+                  itemName : {
+                    type : GraphQLString
+                  },
+                  description : {
+                    type : GraphQLString
+                  },
+                  SectionName : {
+                    type : GraphQLString
+                  },
+                  itemprice : {
+                    type : GraphQLString
+                  },
+                  RestaurantName : {
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root, params) {
+                  const item = new itemModel(params);
+                  const newItem = item.save();
+                  return newItem;  
+                }
+              },
+
+              getSections : {
+                type : new GraphQLList(sectionType),
+                args : {
+                  RestaurantName : {
+                    type : GraphQLString
+                  }
+                },
+                resolve : function(root,params) {
+                  const sections = sectionModel.find({RestaurantName : params.RestaurantName}).exec()
+                  if(!sections) {
+                    throw new Error('Error')
+                  }
+                  return sections
+                } 
+              }   
+
           }
   });
 

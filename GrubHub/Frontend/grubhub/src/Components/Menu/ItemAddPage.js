@@ -9,6 +9,8 @@ import UploadItemImage from './UploadItemImage';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { itemAddition } from '../../actions/itemAction';
+import { addItem } from '../mutations/mutations';
+import { graphql } from 'react-apollo';
 
 const bodyStyle = {
     backgroundColor : '#EBEBED',
@@ -173,10 +175,10 @@ class ItemAddPage extends Component {
         super(props);
         this.state = {
             itemName : "",
-            itemDesc : "",
-            itemSection : "",
-            itemPrice : "",
-            restaurantName : ""
+            description : "",
+            SectionName : "",
+            itemprice : "",
+            RestaurantName : ""
         }
 
         this.handleLogout = this.handleLogout.bind(this);
@@ -188,9 +190,9 @@ class ItemAddPage extends Component {
         cookie.remove('cookie',{ path : '/' });
     }
 
-    onItemSubmit = (e) => {
+    onItemSubmit = async(e) => {
         e.preventDefault();
-        console.log('Inside the item submit button');
+        /*console.log('Inside the item submit button');
         const data = {
             itemName : this.state.itemName,
             itemDesc : this.state.itemDesc,
@@ -212,8 +214,19 @@ class ItemAddPage extends Component {
                 this.props.history.push('/Menu/HomePage/:id');
             }
         })*/
-        this.props.itemAddition(data);
-        this.props.history.push('/Menu/HomePage/:id');
+        //this.props.itemAddition(data);
+
+        let response = await this.props.addItem({
+            variables : {
+                itemName : this.state.itemName,
+                description : this.state.description,
+                itemprice : this.state.itemprice,
+                SectionName : this.state.SectionName,
+                RestaurantName : localStorage.getItem("RestaurantName")
+            }
+        })
+        console.log(response.data);
+        this.props.history.push(`/Menu/HomePage/${localStorage.getItem("RestaurantName")}`);
     }
 
     handleInput = (e) => {
@@ -252,11 +265,11 @@ class ItemAddPage extends Component {
                         <p style = {pStyle5}>Name</p>
                         <input type = "text" className = "form-control" name = "itemName" style = {inputStyle1} onChange = {this.handleInput} required></input>
                         <p style = {pStyle6}>Description</p>
-                        <input type = "text" className = "form-control" name = "itemDesc" style = {inputStyle2} onChange = {this.handleInput} required></input>
+                        <input type = "text" className = "form-control" name = "description" style = {inputStyle2} onChange = {this.handleInput} required></input>
                         <p style = {pStyle7}>Section</p>
-                        <input type = "text" className = "form-control" name = "itemSection" style = {inputStyle3} onChange = {this.handleInput} required></input>
+                        <input type = "text" className = "form-control" name = "SectionName" style = {inputStyle3} onChange = {this.handleInput} required></input>
                         <p style = {pStyle8}>Price</p>
-                        <input type = "text" className = "form-control" name = "itemPrice" style = {inputStyle4} onChange = {this.handleInput} required></input>
+                        <input type = "text" className = "form-control" name = "itemprice" style = {inputStyle4} onChange = {this.handleInput} required></input>
                         <button className = "btn btn-primary" style = {buttonStyle2} onClick = {this.onItemSubmit}>Save and Update</button>
                         <br/>
                         <button className = "btn btn-outline-primary" style = {buttonUpload}>Cancel the Update</button>
@@ -268,8 +281,4 @@ class ItemAddPage extends Component {
     }
 }
 
-ItemAddPage.protoType = {
-    itemAddition : PropTypes.func.isRequired
-};
-
-export default connect(null, { itemAddition })(ItemAddPage);
+export default graphql(addItem,{name : "addItem"})(ItemAddPage);
